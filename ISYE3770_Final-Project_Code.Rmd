@@ -1,0 +1,338 @@
+---
+title: "ISYE 3770 Final Project Code"
+output: html_notebook
+---
+
+ETHNICITY AND GENDER CODE
+Requires Library: library('matrixStats')
+```{r}
+# voter registration by race
+race_registered <- read.csv('1-race_gender_registered.csv', skip=1)
+registered_data <- array(dim = c(28, 8))
+registered_data[,1] <- t(race_registered[,'Citizen.population'])
+
+for (i in 1:5) {
+  registered_data[,i+1] = t(race_registered[,paste('Citizen.population.', i, sep='')])
+}
+
+registered_data[,7] <- t(race_registered[,'Male'])
+registered_data[,8] <- t(race_registered[,'Female'])
+colnames(registered_data) <- c('Total', 'White', 'White (NH)',  'Black', 'Asian', 'Hispanic', 'Male', 'Female')
+boxplot(registered_data, las=2, main='Registered to Vote \n by Ethnicity and Gender',
+        ylab='Percentage of Citizens')
+
+# voter turnout by race 
+race_voted <- read.csv('1-race_gender_voted.csv', skip=1)
+voted_data <- array(dim = c(28, 8))
+voted_data[,1] <- t(race_voted[,'Citizen.population'])
+
+for (i in 1:5) {
+  voted_data[,i+1] = t(race_voted[,paste('Citizen.population.', i, sep='')])
+}
+
+voted_data[,7] <- t(race_voted[,'Male'])
+voted_data[,8] <- t(race_voted[,'Female'])
+colnames(voted_data) <- c('Total', 'White', 'White (NH)',  'Black', 'Asian', 'Hispanic', 'Male', 'Female')
+boxplot(voted_data, las=2, main='Actual Voters \n by Ethnicity and Gender',
+        ylab='Percentage of Citizens')
+
+# descriptive statistics
+library('matrixStats')
+registered_summary <- array(dim = c(8, 5))
+registered_summary[,1] <- t(colMeans(na.omit(registered_data)))
+registered_summary[,2] <- t(colMedians(na.omit(registered_data)))
+registered_summary[,3] <- t(colSds(na.omit(registered_data)))
+registered_summary[,4] <- t(colMaxs(na.omit(registered_data)))
+registered_summary[,5] <- t(colMins(na.omit(registered_data)))
+rownames(registered_summary) <- c('Total', 'White', 'White (NH)',  'Black', 'Asian', 'Hispanic', 'Male', 'Female')
+colnames(registered_summary) <- c('Mean-R', 'Median-R', 'Sd-R', 'Max-R', 'Min-R')
+
+voted_summary <- array(dim = c(8, 5))
+voted_summary[,1] <- t(colMeans(na.omit(voted_data)))
+voted_summary[,2] <- t(colMedians(na.omit(voted_data)))
+voted_summary[,3] <- t(colSds(na.omit(voted_data)))
+voted_summary[,4] <- t(colMaxs(na.omit(voted_data)))
+voted_summary[,5] <- t(colMins(na.omit(voted_data)))
+rownames(voted_summary) <- c('Total', 'White', 'White (NH)',  'Black', 'Asian', 'Hispanic', 'Male', 'Female')
+colnames(voted_summary) <- c('Mean-V', 'Median-V', 'Sd-V', 'Max-V', 'Min-V')
+
+# combine descriptive stats
+data_summary <- merge(registered_summary, voted_summary, by=0)
+
+# difference in registration and turnout by race
+diff = registered_data - voted_data
+boxplot(diff, las=2, main='Difference in Registered \n and Actual Voters \n by Ethnicity and Gender',
+        ylab='Percentage of Citizens')
+
+# paired t-Test
+t.test(registered_data[,'Total'], registered_data[,'White'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'Total'], registered_data[,'White (NH)'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'Total'], registered_data[,'Black'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'Total'], registered_data[,'Asian'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'Total'], registered_data[,'Hispanic'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'White'], registered_data[,'White (NH)'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'White'], registered_data[,'Black'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'White'], registered_data[,'Asian'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'White'], registered_data[,'Hispanic'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'White (NH)'], registered_data[,'Black'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'White (NH)'], registered_data[,'Asian'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'White (NH)'], registered_data[,'Hispanic'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'Black'], registered_data[,'Asian'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'Black'], registered_data[,'Hispanic'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'Asian'], registered_data[,'Hispanic'], paired=TRUE, alternative='greater')
+
+t.test(voted_data[,'Total'], voted_data[,'White'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'Total'], voted_data[,'White (NH)'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'Total'], voted_data[,'Black'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'Total'], voted_data[,'Asian'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'Total'], voted_data[,'Hispanic'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'White'], voted_data[,'White (NH)'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'White'], voted_data[,'Black'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'White'], voted_data[,'Asian'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'White'], voted_data[,'Hispanic'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'White (NH)'], voted_data[,'Black'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'White (NH)'], voted_data[,'Asian'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'White (NH)'], voted_data[,'Hispanic'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'Black'], voted_data[,'Asian'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'Black'], voted_data[,'Hispanic'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'Asian'], voted_data[,'Hispanic'], paired=TRUE, alternative='greater')
+
+t.test(registered_data[,'Total'], registered_data[,'Male'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'Total'], registered_data[,'Female'], paired=TRUE, alternative='greater')
+t.test(registered_data[,'Male'], registered_data[,'Female'], paired=TRUE, alternative='greater')
+
+t.test(voted_data[,'Total'], voted_data[,'Male'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'Total'], voted_data[,'Female'], paired=TRUE, alternative='greater')
+t.test(voted_data[,'Male'], voted_data[,'Female'], paired=TRUE, alternative='greater')
+
+# voter by demographic over time
+years <- race_registered[,1]
+total_registered <- registered_data[,'Total']
+total_voted <- voted_data[,'Total']
+total_diff <- total_registered - total_voted
+plot(years, total_registered, type='o', col='red', 
+     xlim=c(1975,2030), ylim=c(10,80), xlab='Year',
+     ylab='Percentage of Citizens', las=2, main='Total Voters by Year')
+lines(years, total_voted, type='o', col='blue')
+lines(years, total_diff, type='o', col='green')
+legend("right", legend=c("Registered", "Actual", "Difference"),
+       col=c("red", "blue", "green"), lty=1:2, cex=0.5, box.lty=0)
+
+white_registered <- registered_data[,'White']
+white_voted <- voted_data[,'White']
+white_diff <- white_registered - white_voted
+plot(years, white_registered, type='o', col='red', 
+     xlim=c(1975,2030), ylim=c(10,80), xlab='Year',
+     ylab='Percentage of Citizens', las=2, main='White Voters by Year')
+lines(years, white_voted, type='o', col='blue')
+lines(years, white_diff, type='o', col='green')
+legend("right", legend=c("Registered", "Actual", "Difference"),
+       col=c("red", "blue", "green"), lty=1:2, cex=0.5, box.lty=0)
+
+white_nh_registered <- registered_data[,'White (NH)']
+white_nh_voted <- voted_data[,'White (NH)']
+white_nh_diff <- white_nh_registered - white_nh_voted
+plot(years, white_nh_registered, type='o', col='red', 
+     xlim=c(1975,2030), ylim=c(10,80), xlab='Year',
+     ylab='Percentage of Citizens', las=2, main='White (NH) Voters by Year')
+lines(years, white_nh_voted, type='o', col='blue')
+lines(years, white_nh_diff, type='o', col='green')
+legend("right", legend=c("Registered", "Actual", "Difference"),
+       col=c("red", "blue", "green"), lty=1:2, cex=0.5, box.lty=0)
+
+black_registered <- registered_data[,'Black']
+black_voted <- voted_data[,'Black']
+black_diff <- black_registered - black_voted
+plot(years, black_registered, type='o', col='red', 
+     xlim=c(1975,2030), ylim=c(10,80),  xlab='Year',
+     ylab='Percentage of Citizens', las=2, main='Black Voters by Year')
+lines(years, black_voted, type='o', col='blue')
+lines(years, black_diff, type='o', col='green')
+legend("right", legend=c("Registered", "Actual", "Difference"),
+       col=c("red", "blue", "green"), lty=1:2, cex=0.5, box.lty=0)
+
+asian_registered <- registered_data[,'Asian']
+asian_voted <- voted_data[,'Asian']
+asian_diff <- asian_registered - asian_voted
+plot(years, asian_registered, type='o', col='red', 
+     xlim=c(1985,2030), ylim=c(10,80),  xlab='Year',
+     ylab='Percentage of Citizens', las=2, main='Asian Voters by Year')
+lines(years, asian_voted, type='o', col='blue')
+lines(years, asian_diff, type='o', col='green')
+legend("right", legend=c("Registered", "Actual", "Difference"),
+       col=c("red", "blue", "green"), lty=1:2, cex=0.5, box.lty=0)
+
+hisp_registered <- registered_data[,'Hispanic']
+hisp_voted <- voted_data[,'Hispanic']
+hisp_diff <- hisp_registered - hisp_voted
+plot(years, hisp_registered, type='o', col='red', 
+     xlim=c(1975,2030), ylim=c(10,80), xlab='Year',
+     ylab='Percentage of Citizens', las=2, main='Hispanic Voters by Year')
+lines(years, hisp_voted, type='o', col='blue')
+lines(years, hisp_diff, type='o', col='green')
+legend("right", legend=c("Registered", "Actual", "Difference"),
+       col=c("red", "blue", "green"), lty=1:2, cex=0.5, box.lty=0)
+
+male_registered <- registered_data[,'Male']
+male_voted <- voted_data[,'Male']
+male_diff <- male_registered - male_voted
+plot(years, male_registered, type='o', col='red', 
+     xlim=c(1964,2035), ylim=c(10,80), xlab='Year',
+     ylab='Percentage of Citizens', las=2, main='Male Voters by Year')
+lines(years, male_voted, type='o', col='blue')
+lines(years, male_diff, type='o', col='green')
+legend("right", legend=c("Registered", "Actual", "Difference"),
+       col=c("red", "blue", "green"), lty=1:2, cex=0.5, box.lty=0)
+
+female_registered <- registered_data[,'Female']
+female_voted <- voted_data[,'Female']
+female_diff <- female_registered - female_voted
+plot(years, female_registered, type='o', col='red', 
+     xlim=c(1964,2035), ylim=c(10,80), xlab='Year',
+     ylab='Percentage of Citizens', las=2, main='Female Voters by Year')
+lines(years, female_voted, type='o', col='blue')
+lines(years, female_diff, type='o', col='green')
+legend("right", legend=c("Registered", "Actual", "Difference"),
+       col=c("red", "blue", "green"), lty=1:2, cex=0.5, box.lty=0)
+
+```
+Age VS Voting Rate Regression Plot Code
+```{r}
+# Setup and Plot Data
+df = read.csv("Age_vs_Voting_Rate.csv")
+age = df$Age
+voting_rate = df$Voting.Rate
+plot(age, voting_rate, xlim = c(18, 80), ylim = c(0.2,0.8), xlab="Age group (years)", ylab = "Voting Rate")
+title("Age vs. Voting Rate in November 2016")
+lin_model = lm(voting_rate ~ age)
+abline(lin_model, col="blue")
+summary(lin_model)
+
+# Calculation to get R^2 Value
+x = age
+y = voting_rate
+xsquare = x*x
+ysquare = y*y
+xy = x*y
+xbar = mean(x)
+ybar = mean(y)
+sxx = sum(xsquare) - (sum(x)*sum(x)/length(x))
+sxy = sum(xy) - (sum(x)*sum(y)/length(x))
+b1 = sxy / sxx
+b0 = ybar - (b1*xbar)
+SST = sum(ysquare) - (sum(y)*sum(y)/length(y))
+SSR = b1*sxy
+SSE = SST - SSR
+variance = SSE / (length(x) - 2)
+rSquared = 1 - (SSE/SST)
+
+
+# 95% Confidence interval for B1
+t_crit = qt(p=0.025, df=(length(x)-2),lower.tail=FALSE)
+b1_serr = sqrt(variance / sxx)
+b1_lower = b1 - t_crit*b1_serr
+b1_upper = b1 + t_crit*b1_serr
+print(b1_lower)
+print(b1_upper)
+
+
+# 95% Prediction interval
+newx <- seq(min(x), max(x), by=1)
+pred_interval <- predict(lin_model, newdata=data.frame(QUET=newx), interval="prediction", level = 0.95)
+lines(newx, pred_interval[,2], col="orange", lty=2)
+lines(newx, pred_interval[,3], col="orange", lty=2)
+
+# Make Legend
+legend("topleft", legend=c("Line of Best Fit", "95% Prediction Interval"), col=c("blue", "orange"), lty=1:2, cex=0.8)
+
+# Print Summary of Regression Model
+summary(lin_model)
+
+```
+
+Age vs Voting Rate Normality Plot
+```{r}
+# Create Normality Plot
+df = read.csv("Age_vs_Voting_Rate.csv")
+age = df$Age
+voting_rate = df$Voting.Rate
+lin_model = lm(voting_rate ~ age)
+stdres = rstandard(lin_model)
+qqnorm(stdres, ylab="Standardized Residuals", xlab="Normal Scores", main="Normality of Voting Rates") 
+qqline(stdres)
+summary(lin_model)
+```
+
+
+
+REGION CODE
+```{r}
+#North East
+data = read.csv(file = "RegionalData.csv", header = TRUE)
+NorthEast = data$North_East
+nationalAverage = data$ï..National_Average
+years = data$Years
+regNE<-lm(NorthEast~years)
+plot(years, NorthEast, pch=16,
+     xlim=c(1964,2018),
+     ylim=c(0,100),
+     xlab="Years",
+     ylab="North East Voter Turnout (%)",
+     main="North East Voter Turnout vs Years")
+abline(regNE)
+tTestNE = t.test(NorthEast, nationalAverage, paired=TRUE)
+
+MidWest = data$MidWest
+nationalAverage = data$National_Average_Reformatted
+years = data$Years_Reformatted
+
+#Mid West 
+regMW<-lm(MidWest~years)
+plot(years, MidWest, pch=16,
+     xlim=c(1964,2018),
+     ylim=c(0,100),
+     xlab="Years",
+     ylab="Mid West Voter Turnout (%)",
+     main="Mid West Voter Turnout vs Years")
+abline(regMW)
+tTestMW = t.test(MidWest, nationalAverage, paired=TRUE)
+
+#South
+South = data$South
+nationalAverage = data$ï..National_Average
+years = data$Years
+regS<-lm(South~years)
+plot(years, South, pch=16,
+     xlim=c(1964,2018),
+     ylim=c(0,100),
+     xlab="Years",
+     ylab="South Voter Turnout (%)",
+     main="South Voter Turnout vs Years")
+abline(regS)
+tTestSouth = t.test(South, nationalAverage, paired=TRUE)
+
+#West
+West = data$West
+nationalAverage = data$National_Average_Reformatted
+years = data$Years_Reformatted
+regW<-lm(West~years)
+plot(years, West, pch=16,
+     xlim=c(1964,2018),
+     ylim=c(0,100),
+     xlab="Years",
+     ylab="West Voter Turnout (%)",
+     main="West Voter Turnout vs Years")
+abline(regW)
+tTestWest = t.test(West, nationalAverage, paired=TRUE)
+
+
+# Printing T-Tests Here:
+print(tTestNE)
+summary(regNE)
+print(tTestMW)
+summary(regMW)
+print(tTestSouth)
+summary(regS)
+print(tTestWest)
+summary(regW)
+```
